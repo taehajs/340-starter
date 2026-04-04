@@ -1,28 +1,31 @@
-const express = require('express');
-const path = require('path');
+const express = require("express");
 const app = express();
+const session = require("express-session");
+const flash = require("connect-flash");
+const inventoryRoute = require("./routes/inventoryRoute");
 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: "supersecretkey",
+  resave: false,
+  saveUninitialized: true
+}));
+app.use(flash());
 
-app.get('/', (req, res) => {
-  res.render('index', { title: 'CSE Motors' });
+app.set("view engine", "ejs");
+app.set("views",__dirname + "./views");
+
+app.use(express.static("public"));
+
+app.use("/inv", inventoryRoute);
+
+app.get("/", (req, res) => {
+  res.render("index", { title: "Home", message: req.flash("notice") });
 });
-
-const inventoryRoute = require('./routes/inventoryRoute');
-app.use('/inventory', inventoryRoute);
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render('errors/error', { message: "Something went wrong!" });
-});
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
-
+  console.log(`Server is running on port ${PORT}`);
+}); 

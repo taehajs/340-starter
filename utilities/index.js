@@ -1,17 +1,19 @@
-function buildVehicleHTML(vehicle) {
-  return `
-    <section class="vehicle-detail">
-      <img src="${vehicle.inv_image}" alt="Image of ${vehicle.inv_make} ${vehicle.inv_model}">
-      <div class="vehicle-info">
-      
-        <h2>${vehicle.inv_year} ${vehicle.inv_make} ${vehicle.inv_model}</h2>
+const pool = require("../database/");
 
-        <p><strong>Price:</strong> $${vehicle.inv_price.toLocaleString()}</p>
-        <p><strong>Mileage:</strong> ${vehicle.inv_miles.toLocaleString()} miles</p>
-        <p>${vehicle.inv_description}</p>
-      </div>
-    </section>
-  `;
+async function buildClassificationList(selectedId = null) {
+  const data = await pool.query("SELECT * FROM classification ORDER BY classification_name");
+  
+  let options = "";
+  data.rows.forEach(row => {
+    const selected = selectedId == row.classification_id ? "selected" : "";
+    
+    options += `<option value="${row.classification_id}" ${selected}>${row.classification_name}</option>`;
+  });
+
+  return `<select name="classification_id" id="classification_id" required>
+            <option value="">Choose a Classification</option>
+            ${options}
+          </select>`;
 }
 
-module.exports = { buildVehicleHTML };
+module.exports = { buildClassificationList };

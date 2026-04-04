@@ -1,4 +1,4 @@
-const inventoryModel = require("../models/inventoryModel");
+const inventoryModel = require("../models/inventorymodel");
 const utilities = require("../utilities");
 
 async function buildManagement(req, res) {

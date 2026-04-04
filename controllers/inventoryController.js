@@ -1,28 +1,65 @@
-const invModel = require("../models/inventory-model");
+const inventoryModel = require("../models/inventoryModel");
 const utilities = require("../utilities");
 
+async function buildManagement(req, res) {
+  res.render("inventory/management", {
+    title: "Inventory Management",
+    message: req.flash("notice")
+  });
+}
 
-async function buildByInvId(req, res, next) {
-  try {
-    const invId = parseInt(req.params.invId);
-    const vehicleData = await invModel.getVehicleById(invId);
-    const html = utilities.buildVehicleHTML(vehicleData);
-    res.render("inventory/detail", {
-      title: `${vehicleData.inv_make} ${vehicleData.inv_model}`,
-      content: html
+async function buildAddClassification(req, res) {
+  res.render("inventory/add-classification", {
+    title: "Add Classification",
+    message: req.flash("notice")
+  });
+}
+
+async function addClassification(req, res) {
+  const { classification_name } = req.body;
+  const result = await inventoryModel.addClassification(classification_name);
+  if (result) {
+    req.flash("notice", "Classification added successfully.");
+    res.redirect("/inv/");
+  } else {
+    req.flash("notice", "Failed to add classification.");
+    res.render("inventory/add-classification", {
+      title: "Add Classification",
+      classification_name
     });
-  } catch (error) {
-    next(error);
   }
 }
 
+async function buildAddInventory(req, res) {
+  const classificationList = await utilities.buildClassificationList();
+  res.render("inventory/add-inventory", {
+    title: "Add Inventory",
+    classificationList,
+    message: req.flash("notice")
+  });
+}
 
-function throwError(req, res, next) {
-  try {
-    throw new Error("Intentional 500 error triggered!");
-  } catch (error) {
-    next(error);
+async function addInventory(req, res) {
+  const data = req.body;
+  const result = await inventoryModel.addInventory(data);
+  if (result) {
+    req.flash("notice", "Inventory item added successfully.");
+    res.redirect("/inv/");
+  } else {
+    req.flash("notice", "Failed to add inventory.");
+    const classificationList = await utilities.buildClassificationList(data.classification_id);
+    res.render("inventory/add-inventory", {
+      title: "Add Inventory",
+      classificationList,
+      ...data
+    });
   }
 }
 
-module.exports = { buildByInvId, throwError };
+module.exports = {
+  buildManagement,
+  buildAddClassification,
+  addClassification,
+  buildAddInventory,
+  addInventory
+};

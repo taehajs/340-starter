@@ -1,6 +1,6 @@
 const express = require("express");
 const router = new express.Router();
-const invController = require("../controllers/invController");
+const invController = require("../controllers/inventoryController");
 const { checkClassification, checkInventory } = require("../utilities/validator");
 
 router.get("/", invController.buildManagement);
